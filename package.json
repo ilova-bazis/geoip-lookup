@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "start:migrate:prod": "prisma migrate deploy && node dist/index.js"
   },
   "keywords": [
     "geo",

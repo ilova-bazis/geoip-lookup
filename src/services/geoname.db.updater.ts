@@ -3,7 +3,7 @@ import  {schedule } from 'node-cron';
 import axios from 'axios';
 import geonameRepository from '../repository/geoname.repository';
 import { Action, PrismaClient } from '@prisma/client';
-import syncGeonames from './claud.downloader';
+import syncGeonames from './initial.geonames.downloader';
 
 export class GeonameSyncService {
 
