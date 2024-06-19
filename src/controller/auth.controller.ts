@@ -1,13 +1,16 @@
-import { Request, Response, NextFunction, RequestHandler } from "express";
+import {  RequestHandler } from "express";
 import { CreateUserDto, UserDto } from "../types/create.user.dto";
 import { TokenDto } from "../types/token.dto";
-import { validationResult } from "express-validator";
 import { userRepository } from "../repository/users.repository";
 import jwt from "jsonwebtoken";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 // export async function signup(req: Request<CreateUserDto>, res: Response, next: NextFunction) {
 //     req.
 // }
+const secret = process.env.ACCESS_TOKEN_SECRET;
+if(!secret) {
+    throw new Error("ACCESS_TOKEN_SECRET is not defined")
+}
 
 export const signup: RequestHandler<Record<string, any> | undefined, {user: UserDto, token: TokenDto} | {error: any}, CreateUserDto> = async (req, res, next) => {
 
@@ -19,8 +22,8 @@ export const signup: RequestHandler<Record<string, any> | undefined, {user: User
             return res.status(401).send({error: "Unauthorized"})
         }
         
-        const token = jwt.sign({ses: session.id}, "secret", { expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRATION_TIME!), subject: user.id.toString(), algorithm: "HS256"});
-        const refreshToken = jwt.sign({ses: session.id, tkn: session.token}, "secret", { expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRATION_TIME!), subject: user.id.toString(), algorithm: "HS256"});
+        const token = jwt.sign({ses: session.id}, secret, { expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRATION_TIME!), subject: user.id.toString(), algorithm: "HS256"});
+        const refreshToken = jwt.sign({ses: session.id, tkn: session.token}, secret, { expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRATION_TIME!), subject: user.id.toString(), algorithm: "HS256"});
 
         return res.send({
             token: {
@@ -45,8 +48,7 @@ export const signup: RequestHandler<Record<string, any> | undefined, {user: User
 }
 
 export const signin: RequestHandler<{}, {user: UserDto, token: TokenDto} | {error: string}, {email: string, password: string}> = async (req, res, next) => {
-
-    
+        
     try {
         const session = await userRepository.login(req.body.email, req.body.password);
         if(!session) {
@@ -54,10 +56,10 @@ export const signin: RequestHandler<{}, {user: UserDto, token: TokenDto} | {erro
         }
         
         
-        const token = jwt.sign({ses: session.id}, "secret", { expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRATION_TIME!), subject: session.user.id.toString(), algorithm: "HS256"});
-        const refreshToken = jwt.sign({ses: session.id, tkn: session.token}, "secret", { expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRATION_TIME!), subject: session.user.id.toString(), algorithm: "HS256"});
+        const token = jwt.sign({ses: session.id}, secret, { expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRATION_TIME!), subject: session.user.id.toString(), algorithm: "HS256"});
+        const refreshToken = jwt.sign({ses: session.id, tkn: session.token}, secret, { expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRATION_TIME!), subject: session.user.id.toString(), algorithm: "HS256"});
 
-        // jwt.sign({email: req.body.email}, "secret", (err: Error, token: string) => {
+        // jwt.sign({email: req.body.email}, secret, (err: Error, token: string) => {
         //     if(err) {
         //         return res.status(401).send({error: "Unauthorized"})
         //     }
@@ -89,9 +91,13 @@ export const signin: RequestHandler<{}, {user: UserDto, token: TokenDto} | {erro
     }
 }
 
-function jwtSign(body: any): string {
-    if(!body) {
-        throw new Error("Body is required")
-    }
-    return jwt.sign({}, "secret", {algorithm: "HS256", expiresIn: "1h", subject: "1"})
-}
+// function jwtSign(body: any): string {
+//     const secret = process.env.ACCESS_TOKEN_SECRET;
+//     if(!secret) {
+//         throw new Error("ACCESS_TOKEN_SECRET is not defined")
+//     }
+//     if(!body) {
+//         throw new Error("Body is required")
+//     }
+//     return jwt.sign({}, secret, {algorithm: "HS256", expiresIn: "1h", subject: "1"})
+// }
