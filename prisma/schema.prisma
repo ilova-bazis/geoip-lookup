@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String // Hashed password
+  firstName String
+  lastName  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sessions  Session[]
+  apiKey    ApiKey[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([token])
+  @@map("sessions")
+}
+
+model ApiKey {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  apiKeyHash String   @unique
+  createdAt  DateTime @default(now())
+  revoked    Boolean  @default(false)
+
+  @@map("apikeys")
+}
+
+model Country {
+  id                   Int    @id @default(autoincrement())
+  iso                  String @unique
+  iso3                 String
+  iso_numeric          String
+  fips                 String
+  country              String @unique
+  capital              String
+  area                 Int
+  population           Int
+  continent            String
+  tld                  String
+  currency_code        String
+  currency_name        String
+  phone                String
+  postal_code_format   String
+  postal_code_regex    String
+  languages            String
+  geoname_id           Int
+  neighbours           String
+  equivalent_fips_code String
+
+  @@map("countries")
+  @@index([geoname_id])
+}
+
+model TimeZone {
+  id                 Int      @id @default(autoincrement())
+  country_code       String   @unique
+  time_zone_id       String   @unique
+  gmt_offset_jan     Float
+  dst_offset_jul     Float
+  raw_offset         Float
+
+  // Add indexing for time_zone_id
+  @@index(fields: [time_zone_id])
+
+  @@map("timezones")
+}
+
+model GeoName {
+  id                 BigInt      @id
+  name               String
+  asciiname          String
+  alternatenames     String
+  latitude           Float
+  longitude          Float
+  feature_class      String
+  feature_code       String
+  country_code       String
+  cc2                String
+  admin1_code        String
+  admin2_code        String
+  admin3_code        String
+  admin4_code        String
+  population         BigInt      @default(0)
+  elevation          BigInt      @default(0)
+  dem                String
+  timezone           String
+  modification_date  String
+
+  @@map("geonames")
+  @@index(fields: [latitude, longitude]) 
+}
+
+model GeoNameSyncLog {
+  id                 Int      @id @default(autoincrement())
+  action             Action
+  url                String
+  filename           String
+  error              String?
+  createdAt          DateTime @default(now())
+
+  @@map("geoname_sync_logs")
+}
+
+enum Action {
+  INITIAL
+  UPDATE
+  DELETE
+}
