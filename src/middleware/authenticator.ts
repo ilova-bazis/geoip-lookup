@@ -1,12 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
+
 export const JwtAuthenticator = (req: Request, res: Response, next: NextFunction) => {
+    const secret = process.env.ACCESS_TOKEN_SECRET;
+    if(!secret) {
+        throw new Error("ACCESS_TOKEN_SECRET is not defined")
+    }
     const token = extractBearerToken(req);
     if(token) {
         const result = verifyToken(token);
         if(result) {
-            jwt.verify(token, "secret", (err, decoded) => {
+            jwt.verify(token, secret, (err, decoded) => {
                 if(err) {
                     return res.status(401).send({error: "Unauthorized"})
                 }
