@@ -55,7 +55,7 @@ export const ipLookup = async function(req: Request<LookupDto>, res: Response<IP
     })
 }
 
-export const gpsLookup: RequestHandler<any, GeoName | { error: string }, any, {longitude: string, latitude: string}> = async (req, res, next) => {
+export const gpsLookup: RequestHandler<any, GeoNameData | { error: string }, any, {longitude: string, latitude: string}> = async (req, res, next) => {
     const longitude = parseFloat(req.query.longitude)
     const latitude = parseFloat(req.query.latitude)
     const geonameDatas = await geonameRepository.findNearest(longitude, latitude)
@@ -69,7 +69,12 @@ export const gpsLookup: RequestHandler<any, GeoName | { error: string }, any, {l
             error: "Not found"
         })
     }
-    return res.send(geonameDatas[0])
+    const data = {
+        ...geonameDatas[0],
+        population: Number(geonameDatas[0].population.toString()),
+        id: Number(geonameDatas[0].id.toString()),
+        elevation: Number(geonameDatas[0].elevation.toString()),}
+    return res.send(data)
 }
 
 function getCurrentTimeWithOffset(offset: number): string {
@@ -91,4 +96,26 @@ function identifyIpType(ip: string): "ipv4" | "ipv6" | "unknown" {
         return "ipv4"
     }
     return "unknown"
+}
+
+interface GeoNameData {
+    id: number
+    name: string
+    asciiname: string
+    alternatenames: string
+    latitude: number
+    longitude: number
+    feature_class: string
+    feature_code: string
+    country_code: string
+    cc2: string
+    admin1_code: string
+    admin2_code: string
+    admin3_code: string
+    admin4_code: string
+    population: number
+    elevation: number
+    dem: string
+    timezone: string
+    modification_date: string
 }
