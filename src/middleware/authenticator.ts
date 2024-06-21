@@ -15,7 +15,7 @@ export const JwtAuthenticator = (req: Request, res: Response, next: NextFunction
                 if(err) {
                     return res.status(401).send({error: "Unauthorized"})
                 }
-                console.log(decoded);
+                // console.log(decoded);
                 req.body.user = decoded;
             })
             next();

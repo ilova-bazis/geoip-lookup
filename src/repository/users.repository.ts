@@ -19,15 +19,15 @@ export class UsersRepository {
     }
 
     async login(email: string, password: string) {
-        console.log(email, password);
-        console.log("Logging in")
+        // console.log(email, password);
+        // console.log("Logging in")
         const user = await this.prisma.user.findUnique({
             where: {
                 email
             }
         })
 
-        console.log(user);
+        // console.log(user);
         if(!user) {
             console.log("user not found");
             return null
@@ -35,13 +35,13 @@ export class UsersRepository {
         }
         
         const isMatch = await bcrypt.compare(password, user.password);
-        console.log("isMatch", isMatch);
+        // console.log("isMatch", isMatch);
         if(!isMatch) {
             return null
         }
-        console.log("ENV", process.env.SESSION_EXPIRATION_TIME, Date.now(), process.env.SESSION_EXPIRATION_TIME! + Date.now());
+        // console.log("ENV", process.env.SESSION_EXPIRATION_TIME, Date.now(), process.env.SESSION_EXPIRATION_TIME! + Date.now());
         const expiresAt = new Date(Date.now() + parseInt(process.env.SESSION_EXPIRATION_TIME!));
-        console.log("expiresAt", expiresAt);
+        // console.log("expiresAt", expiresAt);
         // Create session
         const session = await this.prisma.session.create({
             data: {

@@ -7,6 +7,7 @@ import apikey from './routes/apikey.routes';
 import { GeonameSyncService } from './services/geoname.db.updater';
 import { MaxmindDbService } from './services/maxmind.db.service';
 import { MaxmindDbUpdater } from './services/maxmind.db.updater';
+import morgan from 'morgan';
 
 declare global {
     namespace Express {
@@ -23,10 +24,19 @@ const port = process.env.PORT || 3000;
 const geonameUpdater = new GeonameSyncService();
 geonameUpdater.initialSync();
 // geonameUpdater.sync();
-
+app.use(morgan('dev'));
 const updater = new MaxmindDbUpdater();
 updater.sync().then(() => console.log('MaxMind Database updated successfully')).catch((err) => console.log(err));
 app.use(express.json());
+
+// CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
+    next();
+});
 
 app.use((req, res, next) => {
     req.iplookup = new MaxmindDbService(updater);

@@ -22,7 +22,7 @@ export class GeonameSyncService {
 
     private async log(action: Action, url: string, filename: string, error?: string): Promise<void> {
         
-        console.log(`Syncing ${action}, url: ${url}, filename: ${filename}, error: ${error}`);
+        // console.log(`Syncing ${action}, url: ${url}, filename: ${filename}, error: ${error}`);
         await this.client.geoNameSyncLog.create({
             data: {
                 action: action,

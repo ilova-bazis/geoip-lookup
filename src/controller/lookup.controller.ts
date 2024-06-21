@@ -6,14 +6,14 @@ import { countryRepository } from "../repository/country.repository";
 import { GeoName } from "@prisma/client";
 export const ipLookup = async function(req: Request<LookupDto>, res: Response<IPLookupResponseDto | { error: string }>, next: NextFunction) {
 
-    console.log(req.params.ip);
+    // console.log(req.params.ip);
     const city = await req.iplookup.ipLookup(req.params.ip);
     if(city === null) {
         return res.status(404).send({
             error: "Invalid IP Address"
         })
     }
-    console.log(city)
+    // console.log(city)
     let cityName = city.city?.names.en
     if(!cityName) {
         if(city.location) {

@@ -30,7 +30,7 @@ export class GeoNameRepository {
         // console.log(`SELECT id, name, asciiname, alternatenames, latitude, longitude, feature_class, feature_code, country_code, cc2, admin1_code, admin2_code, admin3_code, admin4_code, population, elevation, dem, timezone, modification_date, earth_distance(ll_to_earth(latitude, longitude), ll_to_earth(${latitude}, ${longitude})) AS distance FROM geonames WHERE latitude > ${minimumLatitude} AND latitude < ${maximumLatitude} AND longitude > ${minimumLongitude} AND longitude < ${maximumLongitude} ORDER BY distance LIMIT 1`)
         // const geoname = await prisma.$queryRaw<GeoName>`SELECT id, name, asciiname, alternatenames, latitude, longitude, feature_class, feature_code, country_code, cc2, admin1_code, admin2_code, admin3_code, admin4_code, population, elevation, dem, timezone, modification_date, earth_distance(ll_to_earth(latitude, longitude), ll_to_earth(${latitude}, ${longitude})) AS distance FROM geonames WHERE latitude > ${minimumLatitude} AND latitude < ${maximumLatitude} AND longitude > ${minimumLongitude} AND longitude < ${maximumLongitude} ORDER BY distance LIMIT 1`
         const geoname = await prisma.$queryRaw<GeoName[]>`SELECT *, point(${longitude}, ${latitude}) <@>  (point(longitude, latitude)::point) as distance FROM geonames WHERE latitude > ${minimumLatitude} AND latitude < ${maximumLatitude} AND longitude > ${minimumLongitude} AND longitude < ${maximumLongitude} ORDER BY distance LIMIT 1`
-        console.log(geoname)
+        // console.log(geoname)
         return geoname
     }
 
@@ -64,7 +64,6 @@ export class GeoNameRepository {
         const fields = data.split("\t");
 
         if (fields.length !== 19) {
-            console.log(fields);
             console.error(`Invalid data format (line:): Expected 20 fields, found ${fields.length}`);
             return null
         }
