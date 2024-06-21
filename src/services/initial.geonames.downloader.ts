@@ -216,15 +216,16 @@ async function migrateToPrisma(parts: number, outputPath: string) { // parts is 
     
         const readableStream = fs.createReadStream( path.join(outputPath, `./part_${i}.txt`), { encoding: 'utf8' });
     
-        promises.push((async() => {
-            try {
-                await parseGeoNameDataStream(readableStream);
-                // fs.unlinkSync(path.join(outputPath, `./part_${i}.txt`));
-            } catch (error) {
-                console.error("Error parsing geonames data:", error);
-                // fs.unlinkSync(path.join(outputPath, `./part_${i}.txt`));
-            }
-        })());
+        // promises.push((async() => {
+           
+        // })());
+        try {
+            await parseGeoNameDataStream(readableStream);
+            // fs.unlinkSync(path.join(outputPath, `./part_${i}.txt`));
+        } catch (error) {
+            console.error("Error parsing geonames data:", error);
+            // fs.unlinkSync(path.join(outputPath, `./part_${i}.txt`));
+        }
         
         // parseGeoNameDataStream(readableStream).then (() => {
         //     console.log("Parsed GeoName Data:");
@@ -234,16 +235,24 @@ async function migrateToPrisma(parts: number, outputPath: string) { // parts is 
         //     fs.unlinkSync(path.join(outputPath, `./part_${i}.txt`));
         // });
     }
-    await Promise.all(promises);
+    // await Promise.all(promises);
+}
+
+async function retryChunk(lines: string[] ) {
+    console.log("Queued for retrying chunk");
+    setTimeout(async () => {
+        await createMany(lines);
+    }, 120000);
 }
 
 async function parseGeoNameDataStream(readableStream: Readable): Promise<void> {
+    let lines: string[] = [];
     try {
         const rl = createInterface({
             input: readableStream,
             crlfDelay: Infinity
         });
-        let lines: string[] = [];
+        
         let lineCount = 0;
         for await (const line of rl) {
             // if (line.trim() === "") {
@@ -253,15 +262,22 @@ async function parseGeoNameDataStream(readableStream: Readable): Promise<void> {
             lines.push(line);
 
             if (lineCount % 100000 === 0) {
+                try {
                 console.log(`Line ${lineCount}`);
                 await createMany(lines);
                 lines = [];
+                } catch (error) {
+                    console.error("Error creating geonames data:", error);
+                    retryChunk([...lines]);
+                    lines = [];
+                }
             }
         }
         if(lines.length > 0) {
             await createMany(lines);
         }
     } catch (error) {
+        
         console.error("Error parsing geonames data:", error);
     }
 }
