@@ -8,6 +8,7 @@ import { GeonameSyncService } from './services/geoname.db.updater';
 import { MaxmindDbService } from './services/maxmind.db.service';
 import { MaxmindDbUpdater } from './services/maxmind.db.updater';
 import morgan from 'morgan';
+import axios from 'axios';
 
 declare global {
     namespace Express {
@@ -52,6 +53,34 @@ app.use('/api', user);
 app.use('/auth', auth);
 app.use('/apikey', apikey);
 app.use('/lookup', lookup);
+
+app.get('/test/:ip', (req: Request, res: Response) => {
+    console.log("Incoming test request");
+    const apikey = req.query.apikey
+    if(!apikey) {
+        return res.status(400).send('Missing apikey');
+    }
+    const ip = req.params.ip;
+    if(!ip) {
+        return res.status(400).send('Missing ip');
+    }
+
+    console.log(ip);
+    console.log(apikey);
+
+    axios.get('https://geo.tamos.app/lookup/' + ip + '?apikey=' + apikey)
+    .then((response: any) => {
+        console.log("Response: ", response);
+        console.log(response.data);
+        res.send(response.data);
+    })
+    .catch((error) => {
+        console.log(error);
+        res.status(500).send(error);
+    });
+
+    // res.send('Hello World!');
+})
 
 app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
