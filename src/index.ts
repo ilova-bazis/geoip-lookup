@@ -9,6 +9,7 @@ import { MaxmindDbService } from './services/maxmind.db.service';
 import { MaxmindDbUpdater } from './services/maxmind.db.updater';
 import morgan from 'morgan';
 import axios from 'axios';
+import https from 'https';
 
 declare global {
     namespace Express {
@@ -55,6 +56,8 @@ app.use('/apikey', apikey);
 app.use('/lookup', lookup);
 
 app.get('/test/:ip', (req: Request, res: Response) => {
+    const agent = new https.Agent({ rejectUnauthorized: false, checkServerIdentity: (e, c) => { return undefined }, requestCert: false });
+    const client = axios.create({ httpsAgent: agent });
     console.log("Incoming test request");
     const apikey = req.query.apikey
     if(!apikey) {
@@ -68,7 +71,7 @@ app.get('/test/:ip', (req: Request, res: Response) => {
     console.log(ip);
     console.log(apikey);
 
-    axios.get('https://geo.tamos.app/lookup/' + ip + '?apikey=' + apikey)
+    client.get('https://geo.tamos.app/lookup/' + ip + '?apikey=' + apikey)
     .then((response: any) => {
         console.log("Response: ", response);
         console.log(response.data);
