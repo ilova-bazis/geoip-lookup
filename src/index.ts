@@ -5,7 +5,7 @@ import auth from './routes/auth.routes';
 import lookup from './routes/lookup.routes';
 import apikey from './routes/apikey.routes';
 import { GeonameSyncService } from './services/geoname.db.updater';
-import { MaxmindDbService } from './services/maxmind.db.service';
+import maxMindService, { MaxmindDbService } from './services/maxmind.db.service';
 import { MaxmindDbUpdater } from './services/maxmind.db.updater';
 import morgan from 'morgan';
 import axios from 'axios';
@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-    req.iplookup = new MaxmindDbService(updater);
+    req.iplookup = maxMindService;
     next();
 })
 
