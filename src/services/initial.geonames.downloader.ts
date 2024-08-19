@@ -163,6 +163,7 @@ export default function syncGeonames(cb: (error: any | undefined) => void) {
         }).then((data) => {
             if(data) {
                 console.log("Already synced");
+                cb(null);
                 return;
             }
             const startTime = Date.now();

@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { createUserDtoSchema, signinUserDtoSchema } from "../types/create.user.dto";
+import { createUserDtoSchema, signinUserDtoSchema } from "../types/dtos/user.dto";
 import { signin, signup } from "../controller/auth.controller";
 import { validationResultMiddleware } from "../middleware/validation.result";
-import jwt from "jsonwebtoken";
+
 
 const router = Router();
 
