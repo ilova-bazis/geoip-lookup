@@ -1,5 +1,5 @@
 import { Router } from "express";
-import lookupDtoSchema, { LookupDto } from "../types/lookup.dto";
+import lookupDtoSchema, { LookupDto } from "../types/dtos/lookup.dto";
 import { validationResultMiddleware } from "../middleware/validation.result";
 import {ipLookup, gpsLookup } from "../controller/lookup.controller";
 import { query } from "express-validator";
